@@ -66,15 +66,13 @@ class AuthController extends Controller
             ],
         ]);
 
-        $user = User::create([
+        User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        Auth::login($user);
-
-        return redirect('/todos');
+        return redirect()->route('login')->with('status', 'Account created. Please log in.');
     }
 
     /**
