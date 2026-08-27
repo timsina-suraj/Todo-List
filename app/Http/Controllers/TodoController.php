@@ -7,6 +7,7 @@ use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class TodoController extends Controller
@@ -18,7 +19,7 @@ class TodoController extends Controller
     {
         $status = $request->query('status', 'all');
 
-        $todos = Todo::query()
+        $todos = Auth::user()->todos()
             ->when($status === 'active',    fn ($query) => $query->where('completed', false))
             ->when($status === 'completed', fn ($query) => $query->where('completed', true))
             ->orderBy('completed')
@@ -29,7 +30,7 @@ class TodoController extends Controller
         return view('todos.index', [
             'todos'       => $todos,
             'status'      => $status,
-            'activeCount' => Todo::where('completed', false)->count(),
+            'activeCount' => Auth::user()->todos()->where('completed', false)->count(),
         ]);
     }
 
@@ -46,7 +47,7 @@ class TodoController extends Controller
      */
     public function store(StoreTodoRequest $request): RedirectResponse
     {
-        Todo::create($request->validated());
+        Auth::user()->todos()->create($request->validated());
 
         return redirect()->route('todos.index')->with('status', 'Todo created.');
     }
@@ -56,6 +57,7 @@ class TodoController extends Controller
      */
     public function edit(Todo $todo): View
     {
+        abort_if($todo->user_id !== Auth::id(), 403);
         return view('todos.edit', ['todo' => $todo]);
     }
 
@@ -64,6 +66,7 @@ class TodoController extends Controller
      */
     public function update(UpdateTodoRequest $request, Todo $todo): RedirectResponse
     {
+        abort_if($todo->user_id !== Auth::id(), 403);
         $todo->update($request->validated());
 
         return redirect()->route('todos.index')->with('status', 'Todo updated.');
@@ -74,6 +77,7 @@ class TodoController extends Controller
      */
     public function destroy(Todo $todo): RedirectResponse
     {
+        abort_if($todo->user_id !== Auth::id(), 403);
         $todo->delete(); // soft delete — sets deleted_at, row stays in DB
 
         return redirect()
@@ -88,7 +92,7 @@ class TodoController extends Controller
      */
     public function restore(int $id): RedirectResponse
     {
-        $todo = Todo::withTrashed()->findOrFail($id);
+        $todo = Auth::user()->todos()->withTrashed()->findOrFail($id);
         $todo->restore();
 
         return redirect()
@@ -101,6 +105,7 @@ class TodoController extends Controller
      */
     public function toggle(Todo $todo): RedirectResponse
     {
+        abort_if($todo->user_id !== Auth::id(), 403);
         $todo->update(['completed' => ! $todo->completed]);
 
         return redirect()->route('todos.index', ['status' => request('status', 'all')]);

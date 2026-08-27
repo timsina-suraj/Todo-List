@@ -133,7 +133,7 @@
         }
         .errors ul { margin: 0; padding-left: 1.1rem; }
         label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; color: var(--text); }
-        input[type=text], input[type=date], textarea, select {
+        input[type=text], input[type=email], input[type=password], input[type=date], textarea, select {
             width: 100%;
             padding: 0.6rem 0.75rem;
             border: 1px solid var(--border);
@@ -143,8 +143,15 @@
             background: var(--surface);
             color: var(--text);
         }
+        input:focus, textarea:focus, select:focus {
+            outline: 3px solid rgba(79, 70, 229, 0.16);
+            border-color: var(--primary);
+        }
         textarea { resize: vertical; min-height: 90px; }
-        .field { margin-bottom: 1.1rem; }
+        .field {
+            margin-bottom: 1.1rem; 
+            
+        }
         .actions { display: flex; gap: 0.6rem; margin-top: 1.5rem; }
         .btn {
             display: inline-flex;
@@ -202,11 +209,52 @@
         .checkbox-form input[type=checkbox] { width: 1.15rem; height: 1.15rem; cursor: pointer; }
         .empty { text-align: center; color: var(--muted); padding: 2.5rem 1rem; }
         form.inline { display: inline; }
+        .auth-card {
+            max-width: 430px;
+            margin: 2rem auto 0;
+            padding: 2rem;
+        }
+        .auth-heading {
+            margin: 0 0 0.45rem;
+            text-align: center;
+            font-size: 1.6rem;
+        }
+        .auth-subtitle {
+            margin: 0 0 1.75rem;
+            color: var(--muted);
+            text-align: center;
+            font-size: 0.92rem;
+        }
+        .auth-footer {
+            margin-top: 1.25rem;
+            color: var(--muted);
+            text-align: center;
+            font-size: 0.88rem;
+        }
+        .auth-footer a { color: var(--primary); font-weight: 600; }
+        .auth-actions { margin-top: 1.5rem; }
+        .auth-actions .btn { width: 100%; }
+        @media (max-width: 480px) {
+            .container { padding: 1.5rem 1rem 3rem; }
+            .auth-card { margin-top: 1rem; padding: 1.35rem; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><a href="{{ route('todos.index') }}">Todo List</a></h1>
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h1 style="margin: 0;"><a href="{{ Auth::check() ? route('todos.index') : route('login') }}">Todo List</a></h1>
+            
+            @auth
+                <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.9rem;">
+                    <span style="color: var(--muted);">Hello, {{ Auth::user()->name }}</span>
+                    <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+                        @csrf
+                        <button type="submit" class="btn btn-secondary btn-sm">Log out</button>
+                    </form>
+                </div>
+            @endauth
+        </header>
 
         @if (session('status') && !session('deleted_todo_id'))
         <div class="toast-wrap" id="statusToastWrap">
