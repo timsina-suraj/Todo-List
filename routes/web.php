@@ -6,4 +6,5 @@ use Illuminate\Support\Facades\Route;
 Route::redirect('/', '/todos');
 
 Route::resource('todos', TodoController::class)->except(['show']);
-Route::patch('todos/{todo}/toggle', [TodoController::class, 'toggle'])->name('todos.toggle');
+Route::patch('todos/{todo}/toggle',   [TodoController::class, 'toggle'])->name('todos.toggle');
+Route::post('todos/{id}/restore',     [TodoController::class, 'restore'])->name('todos.restore');

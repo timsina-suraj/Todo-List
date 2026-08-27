@@ -45,6 +45,83 @@
             margin-bottom: 1.25rem;
             font-size: 0.9rem;
         }
+        /* ── Undo Toast ── */
+        .toast-wrap {
+            position: fixed;
+            bottom: 1.75rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: all;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            background: #1f2430;
+            color: #f9fafb;
+            padding: 0.75rem 1.1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.22);
+            min-width: 280px;
+            max-width: 420px;
+            animation: toast-in 0.3s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        .toast.hiding {
+            animation: toast-out 0.3s ease forwards;
+        }
+        .toast-msg { flex: 1; }
+        .toast-undo {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 0.35rem 0.85rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s;
+        }
+        .toast-undo:hover { background: var(--primary-hover); }
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+            padding: 0 0.1rem;
+            transition: color 0.15s;
+        }
+        .toast-close:hover { color: #f9fafb; }
+        .toast-progress {
+            height: 3px;
+            width: 100%;
+            border-radius: 0 0 12px 12px;
+            background: rgba(255,255,255,0.12);
+            overflow: hidden;
+        }
+        .toast-progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 0 0 12px 12px;
+            transition: width linear;
+        }
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(16px) scale(0.95); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toast-out {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to   { opacity: 0; transform: translateY(8px) scale(0.96); }
+        }
         .errors {
             background: #fef2f2;
             border: 1px solid #fecaca;
@@ -131,8 +208,48 @@
     <div class="container">
         <h1><a href="{{ route('todos.index') }}">Todo List</a></h1>
 
-        @if (session('status'))
+        @if (session('status') && !session('deleted_todo_id'))
             <div class="status">{{ session('status') }}</div>
+        @endif
+
+        @if (session('deleted_todo_id'))
+        <div class="toast-wrap" id="toastWrap">
+            <div class="toast" id="undoToast">
+                <span class="toast-msg">🗑️ <strong>{{ session('deleted_todo_title') }}</strong> deleted</span>
+                <form method="POST" action="{{ route('todos.restore', session('deleted_todo_id')) }}" style="display:inline">
+                    @csrf
+                    <input type="hidden" name="status" value="{{ request('status','all') }}">
+                    <button type="submit" class="toast-undo">Undo</button>
+                </form>
+                <button class="toast-close" onclick="dismissToast()" aria-label="Dismiss">&times;</button>
+            </div>
+            <div class="toast-progress">
+                <div class="toast-progress-bar" id="toastBar" style="width:100%"></div>
+            </div>
+        </div>
+        <script>
+            (function () {
+                const DURATION = 6000;
+                const bar  = document.getElementById('toastBar');
+                const wrap = document.getElementById('toastWrap');
+                let timer;
+
+                // Animate progress bar
+                bar.style.transitionDuration = DURATION + 'ms';
+                // Force reflow so transition fires
+                bar.getBoundingClientRect();
+                bar.style.width = '0%';
+
+                timer = setTimeout(dismissToast, DURATION);
+
+                window.dismissToast = function () {
+                    clearTimeout(timer);
+                    const toast = document.getElementById('undoToast');
+                    toast.classList.add('hiding');
+                    setTimeout(() => wrap && wrap.remove(), 300);
+                };
+            })();
+        </script>
         @endif
 
         @if ($errors->any())

@@ -19,7 +19,7 @@ class TodoController extends Controller
         $status = $request->query('status', 'all');
 
         $todos = Todo::query()
-            ->when($status === 'active', fn ($query) => $query->where('completed', false))
+            ->when($status === 'active',    fn ($query) => $query->where('completed', false))
             ->when($status === 'completed', fn ($query) => $query->where('completed', true))
             ->orderBy('completed')
             ->orderByRaw("FIELD(priority, 'high', 'medium', 'low')")
@@ -27,8 +27,8 @@ class TodoController extends Controller
             ->get();
 
         return view('todos.index', [
-            'todos' => $todos,
-            'status' => $status,
+            'todos'       => $todos,
+            'status'      => $status,
             'activeCount' => Todo::where('completed', false)->count(),
         ]);
     }
@@ -70,13 +70,30 @@ class TodoController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft-delete the specified resource (keeps it in the database).
      */
     public function destroy(Todo $todo): RedirectResponse
     {
-        $todo->delete();
+        $todo->delete(); // soft delete — sets deleted_at, row stays in DB
 
-        return redirect()->route('todos.index')->with('status', 'Todo deleted.');
+        return redirect()
+            ->route('todos.index', ['status' => request('status', 'all')])
+            ->with('deleted_todo_id', $todo->id)
+            ->with('deleted_todo_title', $todo->title)
+            ->with('status', 'Todo deleted.');
+    }
+
+    /**
+     * Restore a soft-deleted todo.
+     */
+    public function restore(int $id): RedirectResponse
+    {
+        $todo = Todo::withTrashed()->findOrFail($id);
+        $todo->restore();
+
+        return redirect()
+            ->route('todos.index', ['status' => request('status', 'all')])
+            ->with('status', "'{$todo->title}' has been restored.");
     }
 
     /**

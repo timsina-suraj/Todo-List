@@ -40,9 +40,10 @@
 
                     <div class="todo-actions">
                         <a href="{{ route('todos.edit', $todo) }}" class="btn btn-secondary btn-sm">Edit</a>
-                        <form class="inline" method="POST" action="{{ route('todos.destroy', $todo) }}" onsubmit="return confirm('Delete this todo?');">
+                        <form class="inline" method="POST" action="{{ route('todos.destroy', $todo) }}">
                             @csrf
                             @method('DELETE')
+                            <input type="hidden" name="status" value="{{ $status }}">
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                         </form>
                     </div>
