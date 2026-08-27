@@ -209,7 +209,37 @@
         <h1><a href="{{ route('todos.index') }}">Todo List</a></h1>
 
         @if (session('status') && !session('deleted_todo_id'))
-            <div class="status">{{ session('status') }}</div>
+        <div class="toast-wrap" id="statusToastWrap">
+            <div class="toast" id="statusToast">
+                <span class="toast-msg">✅ <strong>{{ session('status') }}</strong></span>
+                <button class="toast-close" onclick="dismissStatusToast()" aria-label="Dismiss">&times;</button>
+            </div>
+            <div class="toast-progress">
+                <div class="toast-progress-bar" id="statusToastBar" style="width:100%"></div>
+            </div>
+        </div>
+        <script>
+            (function () {
+                const DURATION = 5000;
+                const bar = document.getElementById('statusToastBar');
+                const wrap = document.getElementById('statusToastWrap');
+                let timer;
+
+                // Animate progress bar
+                bar.style.transitionDuration = DURATION + 'ms';
+                bar.getBoundingClientRect();
+                bar.style.width = '0%';
+
+                window.dismissStatusToast = function () {
+                    clearTimeout(timer);
+                    const toast = document.getElementById('statusToast');
+                    if (toast) toast.classList.add('hiding');
+                    setTimeout(() => wrap && wrap.remove(), 300);
+                };
+
+                timer = setTimeout(window.dismissStatusToast, DURATION);
+            })();
+        </script>
         @endif
 
         @if (session('deleted_todo_id'))
@@ -229,7 +259,7 @@
         </div>
         <script>
             (function () {
-                const DURATION = 6000;
+                const DURATION = 10000; // extended to 10s
                 const bar  = document.getElementById('toastBar');
                 const wrap = document.getElementById('toastWrap');
                 let timer;
@@ -240,14 +270,14 @@
                 bar.getBoundingClientRect();
                 bar.style.width = '0%';
 
-                timer = setTimeout(dismissToast, DURATION);
-
                 window.dismissToast = function () {
                     clearTimeout(timer);
                     const toast = document.getElementById('undoToast');
-                    toast.classList.add('hiding');
+                    if (toast) toast.classList.add('hiding');
                     setTimeout(() => wrap && wrap.remove(), 300);
                 };
+
+                timer = setTimeout(window.dismissToast, DURATION);
             })();
         </script>
         @endif
