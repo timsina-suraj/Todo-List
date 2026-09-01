@@ -6,7 +6,7 @@
     <title>@yield('title', 'Todo List')</title>
     <style>
         :root {
-            --bg: #f4f5f7;
+            --bg: #f1efeeb7;
             --surface: #ffffff;
             --border: #e2e4e9;
             --text: #1f2430;
@@ -237,26 +237,91 @@
         @media (max-width: 480px) {
             .container { padding: 1.5rem 1rem 3rem; }
             .auth-card { margin-top: 1rem; padding: 1.35rem; }
+            .navbar { flex-direction: column; gap: 1rem; padding: 1rem; }
+            .navbar-menu { width: 100%; justify-content: center; }
+        }
+        
+        /* Layout Improvements */
+        .app-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
+        .main-content { flex: 1; }
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        .navbar-brand svg { width: 2rem; height: 2rem; fill: currentColor; }
+        .navbar-menu { display: flex; align-items: center; gap: 1.5rem; }
+        .user-profile { display: flex; align-items: center; gap: 0.75rem; }
+        .avatar {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+        .footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--muted);
+            margin-top: auto;
+            font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h1 style="margin: 0;"><a href="{{ Auth::check() ? route('todos.index') : route('login') }}">Todo List</a></h1>
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <a href="{{ Auth::check() ? route('todos.index') : route('login') }}" class="navbar-brand">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                TODOlist
+            </a>
             
-            @auth
-                <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.9rem;">
-                    <span style="color: var(--muted);">Hello, {{ Auth::user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
-                        @csrf
-                        <button type="submit" class="btn btn-secondary btn-sm">Log out</button>
-                    </form>
-                </div>
-            @endauth
-        </header>
+            <div class="navbar-menu">
+                @auth
+                    <div class="user-profile">
+                        <div class="avatar">
+                            {{ substr(Auth::user()->name, 0, 1) }}
+                        </div>
+                        <span style="font-weight: 500; color: var(--text);">{{ Auth::user()->name }}</span>
+                        <form method="POST" action="{{ route('logout') }}" style="margin: 0; margin-left: 0.5rem;">
+                            @csrf
+                            <button type="submit" class="btn btn-secondary btn-sm">Log out</button>
+                        </form>
+                    </div>
+                @endauth
+            </div>
+        </nav>
 
-        @if (session('status') && !session('deleted_todo_id'))
+        <main class="main-content">
+            <div class="container">
+                @if (session('status') && !session('deleted_todo_id'))
         <div class="toast-wrap" id="statusToastWrap">
             <div class="toast" id="statusToast">
                 <span class="toast-msg">✅ <strong>{{ session('status') }}</strong></span>
@@ -341,6 +406,12 @@
         @endif
 
         @yield('content')
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; {{ date('Y') }} TODOlist Application. All rights reserved.</p>
+        </footer>
     </div>
 </body>
 </html>

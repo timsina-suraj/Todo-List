@@ -33,8 +33,8 @@ abstract class TodoRequest extends FormRequest
     protected function todoRules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:150'],
-            'description' => ['nullable', 'string', 'max:1000'],
+            'title' => ['required', 'string', 'max:50'],
+            'description' => ['nullable', 'string', 'max:300'],
             'due_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
             'priority' => ['required', 'in:low,medium,high'],
         ];
