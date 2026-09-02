@@ -45,93 +45,90 @@
             margin-bottom: 1.25rem;
             font-size: 0.9rem;
         }
-        /* ── Undo Toast ── */
-        .toast-wrap {
+        /* ── Toast System (top-right) ── */
+        #toast-container {
             position: fixed;
-            bottom: 1.75rem;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 1.25rem;
+            right: 1.25rem;
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 0;
+            gap: 0.6rem;
             pointer-events: none;
+            max-width: 380px;
+            width: calc(100vw - 2.5rem);
         }
         .toast {
             pointer-events: all;
             display: flex;
-            align-items: center;
-            gap: 0.85rem;
+            flex-direction: column;
             background: #1f2430;
             color: #f9fafb;
-            padding: 0.75rem 1.1rem;
             border-radius: 12px;
             font-size: 0.9rem;
             box-shadow: 0 8px 30px rgba(0,0,0,0.22);
-            min-width: 280px;
-            max-width: 420px;
-            animation: toast-in 0.3s cubic-bezier(.34,1.56,.64,1) both;
+            overflow: hidden;
+            animation: toast-in 0.35s cubic-bezier(.34,1.56,.64,1) both;
         }
         .toast.hiding {
             animation: toast-out 0.3s ease forwards;
         }
-        .toast-msg { flex: 1; }
-        .toast-undo {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            border-radius: 7px;
-            padding: 0.35rem 0.85rem;
-            font-size: 0.82rem;
-            font-weight: 700;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background 0.15s;
+        .toast.toast-error  { background: #7f1d1d; border-left: 4px solid #ef4444; }
+        .toast.toast-success { background: #14532d; border-left: 4px solid #22c55e; }
+        .toast.toast-info   { background: #1e3a5f; border-left: 4px solid var(--primary); }
+        .toast-body {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.8rem 1rem;
         }
-        .toast-undo:hover { background: var(--primary-hover); }
+        .toast-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+        .toast-msg { flex: 1; line-height: 1.4; }
+        .toast-msg ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+        .toast-msg ul li { margin-bottom: 0.15rem; }
         .toast-close {
             background: transparent;
             border: none;
             color: #9ca3af;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             line-height: 1;
-            padding: 0 0.1rem;
+            padding: 0;
+            flex-shrink: 0;
             transition: color 0.15s;
         }
         .toast-close:hover { color: #f9fafb; }
+        .toast-actions { padding: 0 1rem 0.75rem; display: flex; gap: 0.5rem; }
+        .toast-undo {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 6px;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .toast-undo:hover { background: rgba(255,255,255,0.25); }
         .toast-progress {
             height: 3px;
-            width: 100%;
-            border-radius: 0 0 12px 12px;
-            background: rgba(255,255,255,0.12);
-            overflow: hidden;
+            background: rgba(255,255,255,0.1);
         }
         .toast-progress-bar {
             height: 100%;
-            background: var(--primary);
-            border-radius: 0 0 12px 12px;
+            background: rgba(255,255,255,0.45);
             transition: width linear;
         }
         @keyframes toast-in {
-            from { opacity: 0; transform: translateY(16px) scale(0.95); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateX(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateX(0) scale(1); }
         }
         @keyframes toast-out {
-            from { opacity: 1; transform: translateY(0) scale(1); }
-            to   { opacity: 0; transform: translateY(8px) scale(0.96); }
+            from { opacity: 1; transform: translateX(0) scale(1); }
+            to   { opacity: 0; transform: translateX(24px) scale(0.96); }
         }
-        .errors {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.25rem;
-            font-size: 0.9rem;
-        }
-        .errors ul { margin: 0; padding-left: 1.1rem; }
+        /* errors now shown as toasts */
         label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem; color: var(--text); }
         input[type=text], input[type=email], input[type=password], input[type=date], textarea, select {
             width: 100%;
@@ -321,89 +318,87 @@
 
         <main class="main-content">
             <div class="container">
-                @if (session('status') && !session('deleted_todo_id'))
-        <div class="toast-wrap" id="statusToastWrap">
-            <div class="toast" id="statusToast">
-                <span class="toast-msg">✅ <strong>{{ session('status') }}</strong></span>
-                <button class="toast-close" onclick="dismissStatusToast()" aria-label="Dismiss">&times;</button>
-            </div>
-            <div class="toast-progress">
-                <div class="toast-progress-bar" id="statusToastBar" style="width:100%"></div>
-            </div>
-        </div>
+
+        {{-- ── Unified Toast Container ── --}}
+        <div id="toast-container"></div>
+
         <script>
-            (function () {
-                const DURATION = 5000;
-                const bar = document.getElementById('statusToastBar');
-                const wrap = document.getElementById('statusToastWrap');
-                let timer;
+        (function() {
+            const container = document.getElementById('toast-container');
+            let counter = 0;
+
+            window.showToast = function({ type = 'info', icon, message, html, duration = 5000, actions = '' }) {
+                const id = 'toast-' + (++counter);
+                const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+                const toastIcon = icon || icons[type] || 'ℹ️';
+
+                const el = document.createElement('div');
+                el.className = 'toast toast-' + type;
+                el.id = id;
+                el.innerHTML = `
+                    <div class="toast-body">
+                        <span class="toast-icon">${toastIcon}</span>
+                        <span class="toast-msg">${html || message}</span>
+                        <button class="toast-close" onclick="dismissToast('${id}')" aria-label="Dismiss">&times;</button>
+                    </div>
+                    ${actions ? '<div class="toast-actions">' + actions + '</div>' : ''}
+                    <div class="toast-progress"><div class="toast-progress-bar" id="bar-${id}" style="width:100%"></div></div>
+                `;
+                container.appendChild(el);
 
                 // Animate progress bar
-                bar.style.transitionDuration = DURATION + 'ms';
+                const bar = document.getElementById('bar-' + id);
+                bar.style.transitionDuration = duration + 'ms';
                 bar.getBoundingClientRect();
                 bar.style.width = '0%';
 
-                window.dismissStatusToast = function () {
-                    clearTimeout(timer);
-                    const toast = document.getElementById('statusToast');
-                    if (toast) toast.classList.add('hiding');
-                    setTimeout(() => wrap && wrap.remove(), 300);
-                };
+                const timer = setTimeout(() => dismissToast(id), duration);
+                el._timer = timer;
+            };
 
-                timer = setTimeout(window.dismissStatusToast, DURATION);
-            })();
+            window.dismissToast = function(id) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                clearTimeout(el._timer);
+                el.classList.add('hiding');
+                setTimeout(() => el && el.remove(), 320);
+            };
+
+            // ── Boot toasts from server session ──
+            @if (session('status') && !session('deleted_todo_id'))
+                showToast({ type: 'success', message: @json(session('status')), duration: 5000 });
+            @endif
+
+            @if (session('deleted_todo_id'))
+                showToast({
+                    type: 'info',
+                    icon: '🗑️',
+                    message: '<strong>{{ addslashes(session("deleted_todo_title")) }}</strong> deleted',
+                    duration: 10000,
+                    actions: `<form method="POST" action="{{ route('todos.restore', session('deleted_todo_id')) }}" style="display:inline">
+                        @csrf
+                        <input type="hidden" name="status" value="{{ request('status','all') }}">
+                        <button type="submit" class="toast-undo">Undo</button>
+                    </form>`
+                });
+            @endif
+
+            @if ($errors->any())
+                @php
+                    $errorHtml = '<strong>Please fix the following:</strong><ul>';
+                    foreach($errors->all() as $error) {
+                        $errorHtml .= '<li>' . e($error) . '</li>';
+                    }
+                    $errorHtml .= '</ul>';
+                @endphp
+                showToast({
+                    type: 'error',
+                    duration: 8000,
+                    html: {!! json_encode($errorHtml) !!}
+                });
+            @endif
+        })();
         </script>
-        @endif
-
-        @if (session('deleted_todo_id'))
-        <div class="toast-wrap" id="toastWrap">
-            <div class="toast" id="undoToast">
-                <span class="toast-msg">🗑️ <strong>{{ session('deleted_todo_title') }}</strong> deleted</span>
-                <form method="POST" action="{{ route('todos.restore', session('deleted_todo_id')) }}" style="display:inline">
-                    @csrf
-                    <input type="hidden" name="status" value="{{ request('status','all') }}">
-                    <button type="submit" class="toast-undo">Undo</button>
-                </form>
-                <button class="toast-close" onclick="dismissToast()" aria-label="Dismiss">&times;</button>
-            </div>
-            <div class="toast-progress">
-                <div class="toast-progress-bar" id="toastBar" style="width:100%"></div>
-            </div>
-        </div>
-        <script>
-            (function () {
-                const DURATION = 10000; // extended to 10s
-                const bar  = document.getElementById('toastBar');
-                const wrap = document.getElementById('toastWrap');
-                let timer;
-
-                // Animate progress bar
-                bar.style.transitionDuration = DURATION + 'ms';
-                // Force reflow so transition fires
-                bar.getBoundingClientRect();
-                bar.style.width = '0%';
-
-                window.dismissToast = function () {
-                    clearTimeout(timer);
-                    const toast = document.getElementById('undoToast');
-                    if (toast) toast.classList.add('hiding');
-                    setTimeout(() => wrap && wrap.remove(), 300);
-                };
-
-                timer = setTimeout(window.dismissToast, DURATION);
-            })();
-        </script>
-        @endif
-
-        @if ($errors->any())
-            <div class="errors">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
         @yield('content')
             </div>
