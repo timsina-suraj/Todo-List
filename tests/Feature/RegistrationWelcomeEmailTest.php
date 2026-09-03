@@ -69,4 +69,13 @@ class RegistrationWelcomeEmailTest extends TestCase
         $this->assertSame('Asia/Kathmandu', config('app.timezone'));
         $this->assertSame('Asia/Kathmandu', now()->getTimezone()->getName());
     }
+
+    public function test_root_redirects_guests_to_login_and_users_to_todos(): void
+    {
+        $this->get('/')->assertRedirect(route('login'));
+
+        $this->actingAs(User::factory()->create())
+            ->get('/')
+            ->assertRedirect(route('todos.index'));
+    }
 }

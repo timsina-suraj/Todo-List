@@ -17,6 +17,10 @@ class AuthController extends Controller
      */
     public function login()
     {
+        if (Auth::check()) {
+            return redirect()->route('todos.index');
+        }
+
         return view('auth.login');
     }
 
@@ -167,6 +171,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('status', 'Logged out successfully.');
+        return redirect()->route('login')->with('status', 'Logged out successfully.');
     }
 }
