@@ -16,8 +16,11 @@
         </div>
 
         <div class="field">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="password" style="margin-bottom: 0;">Password</label>
+                <a href="#" onclick="event.preventDefault(); const email = document.getElementById('email').value; window.location.href = '{{ route('password.request') }}' + (email ? '?email=' + encodeURIComponent(email) : '');" style="font-size: 0.85rem; color: var(--primary); text-decoration: none;">Forgot Password?</a>
+            </div>
+            <input type="password" id="password" name="password" required style="margin-top: 0.35rem;">
         </div>
 
         <div class="actions auth-actions">
