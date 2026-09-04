@@ -7,7 +7,7 @@
         <h2 class="auth-heading">Verify OTP</h2>
         <p class="auth-subtitle">Enter the 6-digit OTP sent to your email to continue.</p>
 
-        <form method="POST" action="{{ route('password.verify') }}">
+        <form method="POST" action="{{ route('password.verify') }}" data-auth-form="otp" novalidate>
             @csrf
 
             <div class="field">
@@ -17,7 +17,7 @@
 
             <div class="field">
                 <label for="otp">OTP</label>
-                <input type="text" id="otp" name="otp" value="{{ old('otp') }}" required autofocus>
+                <input type="text" id="otp" name="otp" value="{{ old('otp') }}" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code">
             </div>
 
             <div class="auth-actions">

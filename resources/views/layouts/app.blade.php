@@ -149,6 +149,18 @@
             margin-bottom: 1.1rem; 
             
         }
+        .field-error {
+            display: none;
+            margin: 0.35rem 0 0;
+            color: var(--danger);
+            font-size: 0.82rem;
+        }
+        .field.has-error input {
+            border-color: var(--danger);
+        }
+        .field.has-error .field-error {
+            display: block;
+        }
         .actions { display: flex; gap: 0.6rem; margin-top: 1.5rem; }
         .btn {
             display: inline-flex;
@@ -397,6 +409,100 @@
                     html: {!! json_encode($errorHtml) !!}
                 });
             @endif
+        })();
+        </script>
+
+        <script>
+        (function () {
+            const initialize = () => {
+            const passwordMessage = 'Password must be at least 6 characters and include uppercase, lowercase, a number, and a symbol.';
+            const emailPattern = /^[a-zA-Z0-9.]+@[a-zA-Z0-9.]+\.[a-zA-Z]{2,}$/;
+
+            document.querySelectorAll('form[data-auth-form]').forEach((form) => {
+                const requiresStrongPassword = ['register', 'reset-password'].includes(form.dataset.authForm);
+                const fields = Array.from(form.querySelectorAll('input[required]'));
+                form.noValidate = true;
+
+                fields.forEach((input) => {
+                    const field = input.closest('.field');
+                    const error = document.createElement('p');
+                    error.className = 'field-error';
+                    error.id = input.id + '-error';
+                    error.setAttribute('role', 'alert');
+                    field.appendChild(error);
+                    input.setAttribute('aria-describedby', error.id);
+
+                    input.addEventListener('input', () => validateField(input));
+                    input.addEventListener('blur', () => validateField(input));
+                });
+
+                function getMessage(input) {
+                    const value = input.value.trim();
+                    if (!value) return input.labels[0].textContent.trim() + ' is required.';
+
+                    if (input.type === 'email' && !emailPattern.test(value)) {
+                        return 'Enter a valid email address.';
+                    }
+
+                    if (requiresStrongPassword && input.name === 'password') {
+                        const validPassword = value.length >= 6
+                            && /[a-z]/.test(value)
+                            && /[A-Z]/.test(value)
+                            && /\d/.test(value)
+                            && /[^A-Za-z0-9]/.test(value);
+                        if (!validPassword) return passwordMessage;
+                    }
+
+                    if (requiresStrongPassword && input.name === 'password_confirmation'
+                        && value !== form.elements.password.value) {
+                        return 'Passwords do not match.';
+                    }
+
+                    if (form.dataset.authForm === 'otp' && input.name === 'otp' && !/^\d{6}$/.test(value)) {
+                        return 'Enter the 6-digit OTP.';
+                    }
+
+                    return '';
+                }
+
+                function validateField(input) {
+                    const message = getMessage(input);
+                    const field = input.closest('.field');
+                    const error = field.querySelector('.field-error');
+                    error.textContent = message;
+                    field.classList.toggle('has-error', Boolean(message));
+                    input.setAttribute('aria-invalid', Boolean(message));
+                    return !message;
+                }
+
+                form.addEventListener('submit', (event) => {
+                    const validationResults = fields.map((input) => validateField(input));
+                    const valid = validationResults.every(Boolean);
+                    if (!valid) {
+                        event.preventDefault();
+                    }
+                });
+
+                form.querySelectorAll('button[type="submit"]').forEach((button) => {
+                    button.addEventListener('click', (event) => {
+                        const validationResults = fields.map((input) => validateField(input));
+                        if (validationResults.some((isValid) => !isValid)) {
+                            event.preventDefault();
+                        }
+                    });
+                });
+
+                if (requiresStrongPassword) {
+                    form.elements.password.addEventListener('input', () => validateField(form.elements.password_confirmation));
+                }
+            });
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initialize);
+            } else {
+                initialize();
+            }
         })();
         </script>
 

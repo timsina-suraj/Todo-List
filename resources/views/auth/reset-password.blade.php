@@ -7,7 +7,7 @@
         <h2 class="auth-heading">Reset Password</h2>
         <p class="auth-subtitle">Create a new password for your account.</p>
 
-        <form method="POST" action="{{ route('password.reset') }}">
+        <form method="POST" action="{{ route('password.reset') }}" data-auth-form="reset-password" novalidate>
             @csrf
 
             <div class="field">
@@ -17,12 +17,12 @@
 
             <div class="field">
                 <label for="password">New Password</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required autocomplete="new-password">
             </div>
 
             <div class="field">
                 <label for="password_confirmation">Confirm Password</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" required>
+                <input type="password" id="password_confirmation" name="password_confirmation" required autocomplete="new-password">
             </div>
 
             <div class="auth-actions">

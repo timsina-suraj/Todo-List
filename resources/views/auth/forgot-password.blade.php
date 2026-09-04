@@ -7,12 +7,12 @@
         <h2 class="auth-heading">Forgot Password</h2>
         <p class="auth-subtitle">Enter your email and we'll send you an OTP.</p>
 
-        <form method="POST" action="{{ route('password.email') }}">
+        <form method="POST" action="{{ route('password.email') }}" data-auth-form="forgot-password" novalidate>
             @csrf
 
             <div class="field">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" value="{{ request('email', old('email')) }}" required autofocus>
+                <input type="email" id="email" name="email" value="{{ request('email', old('email')) }}" required autocomplete="email">
             </div>
 
             <div class="auth-actions">

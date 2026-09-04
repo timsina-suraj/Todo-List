@@ -7,12 +7,12 @@
     <h2 class="auth-heading">Welcome Back</h2>
     <p class="auth-subtitle">Log in to manage your tasks.</p>
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" data-auth-form="login" novalidate>
         @csrf
 
         <div class="field">
             <label for="email">Email Address</label>
-            <input type="text" id="email" name="email" value="{{ old('email') }}" required autofocus>
+            <input type="email" id="email" name="email" value="{{ old('email') }}" required autocomplete="email">
         </div>
 
         <div class="field">
@@ -20,7 +20,7 @@
                 <label for="password" style="margin-bottom: 0;">Password</label>
                 <a href="#" onclick="event.preventDefault(); const email = document.getElementById('email').value; window.location.href = '{{ route('password.request') }}' + (email ? '?email=' + encodeURIComponent(email) : '');" style="font-size: 0.85rem; color: var(--primary); text-decoration: none;">Forgot Password?</a>
             </div>
-            <input type="password" id="password" name="password" required style="margin-top: 0.35rem;">
+            <input type="password" id="password" name="password" required style="margin-top: 0.35rem;" autocomplete="current-password">
         </div>
 
         <div class="actions auth-actions">
