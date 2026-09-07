@@ -31,7 +31,7 @@
         </div>
 
         <div class="actions auth-actions">
-            <button type="submit" class="btn btn-primary">Sign Up</button>
+            <button type="submit" class="btn btn-primary" formnovalidate>Sign Up</button>
         </div>
         <p class="auth-footer">Already have an account? <a href="{{ route('login') }}">Log in</a></p>
     </form>

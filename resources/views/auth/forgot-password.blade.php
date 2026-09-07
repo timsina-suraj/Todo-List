@@ -16,7 +16,7 @@
             </div>
 
             <div class="auth-actions">
-                <button type="submit" class="btn btn-primary">Send OTP</button>
+                <button type="submit" class="btn btn-primary" formnovalidate>Send OTP</button>
             </div>
         </form>
 

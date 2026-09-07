@@ -7,7 +7,7 @@
         <h2 class="auth-heading">Verify your email</h2>
         <p class="auth-subtitle">Enter the 6-digit code from your welcome email to activate your account.</p>
 
-        <form method="POST" action="{{ route('email.verify') }}">
+        <form method="POST" action="{{ route('email.verify') }}" data-auth-form="email-verification" novalidate>
             @csrf
 
             <div class="field">
@@ -17,11 +17,11 @@
 
             <div class="field">
                 <label for="code">Verification code</label>
-                <input type="text" id="code" name="code" value="{{ old('code') }}" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autofocus>
+                <input type="text" id="code" name="code" value="{{ old('code') }}" inputmode="numeric" maxlength="6" required autocomplete="one-time-code">
             </div>
 
             <div class="auth-actions">
-                <button type="submit" class="btn btn-primary">Verify email</button>
+                <button type="submit" class="btn btn-primary" formnovalidate>Verify email</button>
             </div>
         </form>
 

@@ -26,7 +26,7 @@
             </div>
 
             <div class="auth-actions">
-                <button type="submit" class="btn btn-primary">Reset Password</button>
+                <button type="submit" class="btn btn-primary" formnovalidate>Reset Password</button>
             </div>
         </form>
     </div>

@@ -17,11 +17,11 @@
 
             <div class="field">
                 <label for="otp">OTP</label>
-                <input type="text" id="otp" name="otp" value="{{ old('otp') }}" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code">
+                <input type="text" id="otp" name="otp" value="{{ old('otp') }}" required inputmode="numeric" maxlength="6" autocomplete="one-time-code">
             </div>
 
             <div class="auth-actions">
-                <button type="submit" class="btn btn-primary">Verify OTP</button>
+                <button type="submit" class="btn btn-primary" formnovalidate>Verify OTP</button>
             </div>
         </form>
     </div>

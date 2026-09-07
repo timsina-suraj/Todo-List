@@ -48,7 +48,7 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect()->intended('/todos')->with('status', 'Logged in successfully.');
+            return redirect()->route('todos.index')->with('status', 'Logged in successfully.');
         }
 
         return back()->withErrors([

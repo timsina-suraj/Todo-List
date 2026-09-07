@@ -34,8 +34,8 @@ abstract class TodoRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:50'],
-            'description' => ['nullable', 'string', 'max:300'],
-            'due_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'description' => ['required', 'string', 'max:300'],
+            'due_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'priority' => ['required', 'in:low,medium,high'],
         ];
     }

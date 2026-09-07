@@ -155,7 +155,7 @@
             color: var(--danger);
             font-size: 0.82rem;
         }
-        .field.has-error input {
+        .field.has-error input, .field.has-error textarea, .field.has-error select {
             border-color: var(--danger);
         }
         .field.has-error .field-error {
@@ -458,8 +458,9 @@
                         return 'Passwords do not match.';
                     }
 
-                    if (form.dataset.authForm === 'otp' && input.name === 'otp' && !/^\d{6}$/.test(value)) {
-                        return 'Enter the 6-digit OTP.';
+                    if (['otp', 'email-verification'].includes(form.dataset.authForm)
+                        && ['otp', 'code'].includes(input.name) && !/^\d{6}$/.test(value)) {
+                        return 'Enter the 6-digit verification code.';
                     }
 
                     return '';
@@ -495,6 +496,69 @@
                 if (requiresStrongPassword) {
                     form.elements.password.addEventListener('input', () => validateField(form.elements.password_confirmation));
                 }
+            });
+
+            document.querySelectorAll('form[data-todo-form]').forEach((form) => {
+                const fields = Array.from(form.querySelectorAll('[data-todo-validate]'));
+                form.noValidate = true;
+
+                fields.forEach((field) => {
+                    const error = document.createElement('p');
+                    error.className = 'field-error';
+                    error.id = field.id + '-error';
+                    error.setAttribute('role', 'alert');
+                    field.closest('.field').appendChild(error);
+                    field.setAttribute('aria-describedby', error.id);
+                    field.addEventListener('input', () => validateField(field));
+                    field.addEventListener('change', () => validateField(field));
+                    field.addEventListener('blur', () => validateField(field));
+                });
+
+                function getMessage(field) {
+                    const value = field.value.trim();
+                    if (field.name === 'title') {
+                        if (!value) return 'Title is required.';
+                        if (value.length > 50) return 'Title must be 50 characters or fewer.';
+                    }
+                    if (field.name === 'description') {
+                        if (!value) return 'Description is required.';
+                        if (value.length > 300) return 'Description must be 300 characters or fewer.';
+                    }
+                    if (field.name === 'due_date') {
+                        if (!value) return 'Due date is required.';
+                        if (field.min && value < field.min) return 'Due date cannot be earlier than today.';
+                    }
+                    if (field.name === 'priority' && !value) {
+                        return 'Priority is required.';
+                    }
+                    if (field.name === 'priority' && !['low', 'medium', 'high'].includes(value)) {
+                        return 'Choose a valid priority.';
+                    }
+                    return '';
+                }
+
+                function validateField(field) {
+                    const message = getMessage(field);
+                    const container = field.closest('.field');
+                    container.querySelector('.field-error').textContent = message;
+                    container.classList.toggle('has-error', Boolean(message));
+                    field.setAttribute('aria-invalid', Boolean(message));
+                    return !message;
+                }
+
+                form.addEventListener('submit', (event) => {
+                    if (!fields.map((field) => validateField(field)).every(Boolean)) {
+                        event.preventDefault();
+                    }
+                });
+
+                form.querySelectorAll('button[type="submit"]').forEach((button) => {
+                    button.addEventListener('click', (event) => {
+                        if (fields.map((field) => validateField(field)).some((isValid) => !isValid)) {
+                            event.preventDefault();
+                        }
+                    });
+                });
             });
             };
 

@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="card">
-        <form method="POST" action="{{ route('todos.update', $todo) }}">
+        <form method="POST" action="{{ route('todos.update', $todo) }}" data-todo-form novalidate>
             @csrf
             @method('PUT')
 
@@ -18,7 +18,7 @@
             </div>
 
             <div class="actions">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="submit" class="btn btn-primary" formnovalidate>Save Changes</button>
                 <a href="{{ route('todos.index') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
