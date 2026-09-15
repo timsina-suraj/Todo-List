@@ -45,7 +45,7 @@
             margin-bottom: 1.25rem;
             font-size: 0.9rem;
         }
-        /* ── Toast System (top-right) ── */
+        /* ── Toast System  ── */
         #toast-container {
             position: fixed;
             top: 1.25rem;
@@ -277,7 +277,16 @@
         }
         .navbar-brand svg { width: 2rem; height: 2rem; fill: currentColor; }
         .navbar-menu { display: flex; align-items: center; gap: 1.5rem; }
-        .user-profile { display: flex; align-items: center; gap: 0.75rem; }
+        .user-profile { position: relative; display: flex; align-items: center; }
+        .user-menu-trigger {
+            background: transparent;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
         .avatar {
             width: 2.25rem;
             height: 2.25rem;
@@ -290,6 +299,68 @@
             font-weight: 600;
             font-size: 1rem;
             text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .avatar-lg {
+            width: 2.8rem;
+            height: 2.8rem;
+            font-size: 1.1rem;
+        }
+        .user-display-name {
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.2;
+        }
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 0.75rem);
+            right: 0;
+            width: min(18rem, 80vw);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.12);
+            padding: 0.75rem;
+            display: none;
+            z-index: 1000;
+        }
+        .user-dropdown.open { display: block; }
+        .user-dropdown-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.25rem 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .user-dropdown-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .user-dropdown-email {
+            font-size: 0.8rem;
+            color: var(--muted);
+            word-break: break-word;
+        }
+        .dropdown-link {
+            display: block;
+            padding: 0.8rem 0.35rem 0.6rem;
+            color: var(--text);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .dropdown-link:hover {
+            background: #f3f4f6;
+        }
+        .dropdown-logout {
+            width: 100%;
+            margin-top: 0.4rem;
+            border-top: 1px solid var(--border);
+            padding-top: 0.5rem;
+        }
+        .dropdown-logout .btn {
+            width: 100%;
         }
         .footer {
             background: var(--surface);
@@ -315,14 +386,33 @@
             <div class="navbar-menu">
                 @auth
                     <div class="user-profile">
-                        <div class="avatar">
-                            {{ substr(Auth::user()->name, 0, 1) }}
+                        <button type="button" class="user-menu-trigger" aria-expanded="false" aria-controls="user-dropdown" aria-label="User menu">
+                            <div class="avatar" aria-hidden="true">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </div>
+                            <span class="user-display-name">{{ Auth::user()->name }}</span>
+                        </button>
+
+                        <div id="user-dropdown" class="user-dropdown" role="menu" aria-label="User menu options">
+                            <div class="user-dropdown-header">
+                                <div class="avatar avatar-lg" aria-hidden="true">
+                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                </div>
+                                <div>
+                                    <div class="user-dropdown-name">{{ Auth::user()->name }}</div>
+                                    <div class="user-dropdown-email">{{ Auth::user()->email }}</div>
+                                </div>
+                            </div>
+
+                            <a href="{{ route('password.change.form') }}" class="dropdown-link">Change Password</a>
+
+                            <div class="dropdown-logout">
+                                <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-secondary btn-sm">Log out</button>
+                                </form>
+                            </div>
                         </div>
-                        <span style="font-weight: 500; color: var(--text);">{{ Auth::user()->name }}</span>
-                        <form method="POST" action="{{ route('logout') }}" style="margin: 0; margin-left: 0.5rem;">
-                            @csrf
-                            <button type="submit" class="btn btn-secondary btn-sm">Log out</button>
-                        </form>
                     </div>
                 @endauth
             </div>
@@ -418,8 +508,26 @@
             const passwordMessage = 'Password must be at least 6 characters and include uppercase, lowercase, a number, and a symbol.';
             const emailPattern = /^[a-zA-Z0-9.]+@[a-zA-Z0-9.]+\.[a-zA-Z]{2,}$/;
 
+            const userMenuTrigger = document.querySelector('.user-menu-trigger');
+            const userDropdown = document.getElementById('user-dropdown');
+            if (userMenuTrigger && userDropdown) {
+                userMenuTrigger.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const isOpen = userDropdown.classList.contains('open');
+                    userDropdown.classList.toggle('open', !isOpen);
+                    userMenuTrigger.setAttribute('aria-expanded', String(!isOpen));
+                });
+
+                document.addEventListener('click', (event) => {
+                    if (!userDropdown.contains(event.target) && !userMenuTrigger.contains(event.target)) {
+                        userDropdown.classList.remove('open');
+                        userMenuTrigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+
             document.querySelectorAll('form[data-auth-form]').forEach((form) => {
-                const requiresStrongPassword = ['register', 'reset-password'].includes(form.dataset.authForm);
+                const requiresStrongPassword = ['register', 'reset-password', 'change-password'].includes(form.dataset.authForm);
                 const fields = Array.from(form.querySelectorAll('input[required]'));
                 form.noValidate = true;
 
@@ -456,6 +564,10 @@
                     if (requiresStrongPassword && input.name === 'password_confirmation'
                         && value !== form.elements.password.value) {
                         return 'Passwords do not match.';
+                    }
+
+                    if (form.dataset.authForm === 'change-password' && input.name === 'current_password' && !value) {
+                        return 'Current password is required.';
                     }
 
                     if (['otp', 'email-verification'].includes(form.dataset.authForm)

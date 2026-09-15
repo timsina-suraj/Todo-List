@@ -164,6 +164,40 @@ class AuthController extends Controller
     /**
      * Log the user out of the application.
      */
+    public function showChangePasswordForm()
+    {
+        return view('auth.change-password');
+    }
+
+    /**
+     * Update the authenticated user's password.
+     */
+    public function changePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => [
+                'required',
+                'confirmed',
+                'different:current_password',
+                Rules\Password::min(6)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
+            ],
+        ]);
+
+        $request->user()->forceFill([
+            'password' => Hash::make($validated['password']),
+        ])->save();
+
+        return redirect()->route('todos.index')->with('status', 'Password changed successfully.');
+    }
+
+    /**
+     * Log the user out of the application.
+     */
     public function logout(Request $request)
     {
         Auth::logout();

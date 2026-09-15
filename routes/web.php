@@ -36,6 +36,8 @@ Route::middleware(['guest', PreventAuthenticatedPageCaching::class])->group(func
 });
 
 Route::middleware(['auth', PreventAuthenticatedPageCaching::class])->group(function () {
+    Route::get('change-password', [AuthController::class, 'showChangePasswordForm'])->name('password.change.form');
+    Route::post('change-password', [AuthController::class, 'changePassword'])->name('password.change');
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::resource('todos', TodoController::class)->except(['show']);
